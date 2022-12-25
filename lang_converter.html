@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script language="javascript">
+        function convert() {
+
+            const input = document.getElementById("file");
+            const reader = new FileReader();
+
+            reader.onload = function () {
+                const fileContent = reader.result;
+                if (document.getElementById("l2j").checked) {
+
+                    const lines = fileContent.match(/([^\r\n])+/g);
+
+                    const data = {};
+
+                    lines.forEach(line => {
+                        const [key, value] = line.split('#')[0].trim().split('=');
+                        data[key] = value;
+                    });
+                    downloadFile(JSON.stringify(data), input.files[0].name.replace(/\.[^/.]+$/, '.json'));
+                }
+                else {
+                    const jsonData = JSON.parse(fileContent);
+                    const data = [];
+                    Object.entries(jsonData).forEach(([key, value]) => {
+                        data.push(`${key}=${value}`);
+                    });
+                    downloadFile(data.join('\n'), input.files[0].name.replace(/\.[^/.]+$/, '.lang'));
+                }
+
+            };
+
+            reader.readAsText(input.files[0]);
+        }
+
+        function downloadFile(data, filename) {
+            const blob = new Blob([data], { type: 'text/plain' });
+
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+    </script>
+</head>
+
+<body>
+    <input type="file" id="file" />
+    <br />
+    模式：<label>lang轉json<input type="radio" id="l2j" name="mode" checked /></label><label>json轉lang<input type="radio" id="j2l"
+            name="mode" /></label>
+    <br />
+    <button onclick="javascript:convert()">轉換</button>
+</body>
+
+</html>
