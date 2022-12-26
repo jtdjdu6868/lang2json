@@ -3,37 +3,46 @@
 
 <head>
     <script language="javascript">
-        function convert() {
+        async function convert() {
 
             const input = document.getElementById("file");
             const reader = new FileReader();
 
-            reader.onload = function () {
-                const fileContent = reader.result;
-                if (document.getElementById("l2j").checked) {
+            for(let file of input.files)
+            {
+                let filename = file.name;
+                await new Promise((resolve, reject) =>
+                {
+                    reader.onload = function ()
+                    {
+                        const fileContent = reader.result;
+                        if (document.getElementById("l2j").checked)
+                        {
 
-                    const lines = fileContent.match(/([^\r\n])+/g);
+                            const lines = fileContent.match(/([^\r\n])+/g);
 
-                    const data = {};
+                            const data = {};
 
-                    lines.forEach(line => {
-                        const [key, value] = line.split('#')[0].trim().split('=');
-                        data[key] = value;
-                    });
-                    downloadFile(JSON.stringify(data), input.files[0].name.replace(/\.[^/.]+$/, '.json'));
-                }
-                else {
-                    const jsonData = JSON.parse(fileContent);
-                    const data = [];
-                    Object.entries(jsonData).forEach(([key, value]) => {
-                        data.push(`${key}=${value}`);
-                    });
-                    downloadFile(data.join('\n'), input.files[0].name.replace(/\.[^/.]+$/, '.lang'));
-                }
-
-            };
-
-            reader.readAsText(input.files[0]);
+                            lines.forEach(line => {
+                                const [key, value] = line.split('#')[0].trim().split('=');
+                                data[key] = value;
+                            });
+                            downloadFile(JSON.stringify(data), filename.replace(/\.[^/.]+$/, '.json'));
+                        }
+                        else
+                        {
+                            const jsonData = JSON.parse(fileContent);
+                            const data = [];
+                            Object.entries(jsonData).forEach(([key, value]) => {
+                                data.push(`${key}=${value}`);
+                            });
+                            downloadFile(data.join('\n'), filename.replace(/\.[^/.]+$/, '.lang'));
+                        }
+                        resolve();
+                    }
+                    reader.readAsText(file);
+                });
+            }
         }
 
         function downloadFile(data, filename) {
@@ -48,7 +57,7 @@
 </head>
 
 <body>
-    <input type="file" id="file" />
+    <input type="file" id="file" multiple accept=".lang,.json" />
     <br />
     模式：<label>lang轉json<input type="radio" id="l2j" name="mode" checked /></label><label>json轉lang<input type="radio" id="j2l"
             name="mode" /></label>
