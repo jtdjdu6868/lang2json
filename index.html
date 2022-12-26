@@ -24,14 +24,14 @@
                             const data = {};
 
                             lines.forEach(line => {
-                                const [key, value] = line.split('#')[0].trim().split('=');
+                                const [key, value] = line.split('#')[0].trim().split(/=(.*)/s);
                                 data[key] = value;
                             });
-                            downloadFile(JSON.stringify(data), filename.replace(/\.[^/.]+$/, '.json'));
+                            downloadFile(JSON.stringify(data).replace(/\\\\/g, '\\'), filename.replace(/\.[^/.]+$/, '.json'));
                         }
                         else
                         {
-                            const jsonData = JSON.parse(fileContent);
+                            const jsonData = JSON.parse(fileContent.replace(/\\n/, '\\\\n'));
                             const data = [];
                             Object.entries(jsonData).forEach(([key, value]) => {
                                 data.push(`${key}=${value}`);
